@@ -2,6 +2,7 @@ package com.alvarengadev.selectitemrcy.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,7 @@ class ItemAdapter : RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
         "Ruby"
     )
     private var tracker: SelectionTracker<Long>? = null
+    private var observerItemAdapter: ObserverItemAdapter? = null
 
     init {
         setHasStableIds(true)
@@ -23,6 +25,10 @@ class ItemAdapter : RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     fun setTracker(tracker: SelectionTracker<Long>) {
         this.tracker = tracker
+    }
+
+    fun setObserverItemAdapter(observerItemAdapter: ObserverItemAdapter) {
+        this.observerItemAdapter = observerItemAdapter
     }
 
     override fun onCreateViewHolder(
@@ -44,11 +50,27 @@ class ItemAdapter : RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
         tracker?.let {
             holder.bind(list[position], it.isSelected(position.toLong()))
         }
+
+        tracker?.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
+            override fun onSelectionChanged() {
+                super.onSelectionChanged()
+                val items = tracker?.selection?.size()
+                if (items == 1) {
+                    observerItemAdapter?.setVisibility()
+                }
+            }
+        })
     }
 
     override fun getItemCount(): Int = list.size
 
     override fun getItemId(position: Int): Long = position.toLong()
+
+//    fun deleteItem(item: Item) {
+//        notifyItemRemoved(listItems.indexOf(item))
+//        listItems.remove(item)
+//        observerListEmpty?.observer(listItems)
+//    }
 
     inner class ViewHolder(
         private val binding: ItemBinding
